@@ -1,41 +1,78 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#1f3b73"><link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><title>카드 실적</title>
-<style>body{margin:0;font-family:system-ui,'Noto Sans KR',sans-serif;background:#f2f4f8;color:#222}
-.wrap{max-width:520px;margin:auto;padding:14px}.ban{background:#1f3b73;color:#fff;border-radius:18px;padding:18px}
-.ban small{opacity:.8}.ban b{display:block;font-size:30px;margin:6px 0}.card{background:#fff;border-radius:18px;padding:16px;margin-top:12px;box-shadow:0 1px 4px #0001}
-.h{display:flex;justify-content:space-between;font-size:20px;font-weight:700}.tot{font-size:26px;font-weight:800;margin:6px 0}
-.bar{height:16px;background:#e6e9f0;border-radius:9px;overflow:hidden;position:relative}.bar i{display:block;height:100%;background:#2f6fec}
-.bar u{position:absolute;top:0;bottom:0;width:2px;background:#e33}.s{color:#666;font-size:15px;margin-top:6px}.ok{color:#14894a;font-weight:700}
-.up{color:#888;text-align:center;font-size:13px;margin:16px}.empty{color:#999;font-size:15px}.bh{font-size:20px;font-weight:800;margin:22px 4px 4px}details.card summary{font-size:18px;font-weight:700;cursor:pointer;list-style:none}
-details.card summary::after{content:' ▾';color:#888}details[open].card summary::after{content:' ▴'}.tier{border:1px solid #e3e6ee;border-radius:12px;padding:10px;margin-top:8px}
-.tier.cur{border:2px solid #2f6fec;background:#eef4ff}.tier b{font-size:15px}.tier ul,.ex ul{margin:6px 0 0 18px;padding:0;font-size:14px;color:#333}.ex{font-size:13px;color:#666;margin-top:10px}.src{font-size:12px;color:#999;margin-top:6px;word-break:break-all}.tl{font-size:14px;color:#555;margin-top:6px;padding:5px 8px;border-radius:8px;line-height:1.35}.tl.on{background:#e6f6ec;border-left:4px solid #14894a}.sh{color:#1f3b73}</style></head><body><div class="wrap"><div id="app"></div><div id="ben"></div></div>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,'Noto Sans KR',sans-serif;background:#f2f4f8;color:#222;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:520px;margin:auto;padding:14px 14px 90px}
+.ban{background:linear-gradient(135deg,#1f3b73,#2f6fec);color:#fff;border-radius:20px;padding:18px}.ban small{opacity:.85}.ban b{display:block;font-size:30px;margin:6px 0}
+.card{background:#fff;border-radius:18px;padding:16px;margin-top:12px;box-shadow:0 1px 4px #0001}
+.h{display:flex;justify-content:space-between;align-items:center;font-size:19px;font-weight:700}.tot{font-size:26px;font-weight:800;margin:4px 0 8px}
+.bar{height:14px;background:#e6e9f0;border-radius:9px;overflow:hidden;position:relative}.bar i{display:block;height:100%;background:#2f6fec;border-radius:9px}
+.bar u{position:absolute;top:0;bottom:0;width:2px;background:#e33}.s{color:#666;font-size:14px;margin-top:6px}.ok{color:#14894a;font-weight:700}.no{color:#c2410c;font-weight:700}
+.chev{color:#999;font-size:14px;transition:.2s}.open .chev{transform:rotate(180deg)}.det{display:none;margin-top:10px;border-top:1px solid #eee;padding-top:6px}.open .det{display:block}
+.tl{font-size:14px;color:#555;margin-top:6px;padding:7px 9px;border-radius:10px;line-height:1.4;background:#f7f8fb}.tl.on{background:#e6f6ec;border-left:4px solid #14894a}.sh{color:#1f3b73}
+.tier{border:1px solid #e3e6ee;border-radius:12px;padding:10px;margin-top:8px}.tier.on{border:2px solid #14894a;background:#f1fbf4}.tier b{font-size:15px}
+.tier ul,.ex ul{margin:6px 0 0 18px;padding:0;font-size:14px;color:#333}.ex{font-size:13px;color:#666;margin-top:10px}.src{font-size:11px;color:#aaa;margin-top:6px;word-break:break-all}
+.up{color:#888;text-align:center;font-size:13px;margin:16px}.empty{color:#999;font-size:15px;text-align:center;padding:24px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 2px}.chip{flex:none;border:1px solid #ccd3e0;background:#fff;border-radius:20px;padding:7px 13px;font-size:14px}.chip.on{background:#1f3b73;color:#fff;border-color:#1f3b73}
+.tx{display:flex;justify-content:space-between;align-items:center;padding:11px 2px;border-bottom:1px solid #f0f1f4}.tx:last-child{border:0}.tx .l{font-size:15px}.tx .m{font-size:12px;color:#888;margin-top:2px}
+.amt{font-weight:700;font-size:16px;text-align:right}.tag{font-size:11px;padding:2px 7px;border-radius:9px;margin-left:4px}.tag.ok{background:#e6f6ec}.tag.no{background:#fdecdf}
+.row{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:14px}.row .n{width:78px;flex:none}.row .b{flex:1;height:12px;background:#eef0f5;border-radius:7px;overflow:hidden}.row .b i{display:block;height:100%;border-radius:7px}.row .v{width:84px;text-align:right;flex:none}
+select{font-size:16px;padding:6px 10px;border-radius:10px;border:1px solid #ccd3e0;background:#fff}
+.cols{display:flex;align-items:flex-end;gap:2px;height:120px;margin-top:10px}.cols i{flex:1;background:#2f6fec;border-radius:3px 3px 0 0;min-height:1px}.axis{display:flex;justify-content:space-between;font-size:11px;color:#999}
+nav{position:fixed;left:0;right:0;bottom:0;background:#fff;display:flex;border-top:1px solid #e3e6ee;padding-bottom:env(safe-area-inset-bottom);z-index:9}
+nav button{flex:1;border:0;background:none;padding:9px 0 10px;font-size:12px;color:#888}nav button div{font-size:22px;line-height:1.1}nav button.on{color:#1f3b73;font-weight:700}
+</style></head><body><div class="wrap" id="app"></div>
+<nav><button data-t="0" class="on"><div>💳</div>카드 실적</button><button data-t="1"><div>🧾</div>사용내역</button><button data-t="2"><div>📊</div>가계부</button></nav>
 <script>
-const EMB={"month": "2026-10", "updated_at": "2026-10-20T11:40+09:00", "has_data": false, "recommendation": {"card": "삼성카드", "reason": "30만 원까지 300,000원 남았어요 (60만 원 넘기면 혜택 한 단계 더)"}, "cards": [{"key": "samsung", "name": "삼성카드", "last4": null, "total": 0, "target": 300000, "target_active": true, "target_start": null, "tier2": 600000, "priority": 1, "tiers": [{"min": 300000, "remaining": 300000, "reached": false}, {"min": 600000, "remaining": 600000, "reached": false}], "remaining": 300000, "transactions": []}, {"key": "hana", "name": "하나카드", "last4": null, "total": 0, "target": 200000, "target_active": true, "target_start": null, "tier2": null, "priority": 2, "tiers": [{"min": 200000, "remaining": 200000, "reached": false}], "remaining": 200000, "transactions": []}, {"key": "kb", "name": "KB국민카드", "last4": null, "total": 0, "target": 300000, "target_active": false, "target_start": "2027-01", "tier2": null, "priority": 3, "tiers": [{"min": 300000, "remaining": 300000, "reached": false}, {"min": 700000, "remaining": 700000, "reached": false}, {"min": 1000000, "remaining": 1000000, "reached": false}], "remaining": null, "transactions": []}, {"key": "shinhan", "name": "신한카드", "last4": null, "total": 0, "target": null, "target_active": false, "target_start": null, "tier2": null, "priority": null, "tiers": [{"min": 300000, "remaining": 300000, "reached": false}, {"min": 500000, "remaining": 500000, "reached": false}, {"min": 600000, "remaining": 600000, "reached": false}, {"min": 1000000, "remaining": 1000000, "reached": false}], "remaining": null, "transactions": []}, {"key": "hyundai", "name": "현대카드", "last4": null, "total": 0, "target": null, "target_active": false, "target_start": null, "tier2": null, "priority": null, "tiers": [{"min": 500000, "remaining": 500000, "reached": false}, {"min": 1000000, "remaining": 1000000, "reached": false}], "remaining": null, "transactions": []}, {"key": "ulsan", "name": "울산페이", "last4": null, "total": 0, "target": null, "target_active": false, "target_start": null, "tier2": null, "priority": null, "tiers": [{"min": 200000, "remaining": 200000, "reached": false}], "remaining": null, "transactions": []}]}, w=n=>n.toLocaleString('ko-KR')+'원';
-function render(d){let h=`<div class="ban"><small>오늘 쓸 카드</small><b>${d.recommendation.card}</b>${d.recommendation.reason}</div>`;
-if(!d.has_data)h+=`<div class="card empty">아직 결제 알림이 없어요</div>`;
-for(const c of d.cards){const n=c.transactions.length;h+=`<div class="card"><div class="h"><span>${c.name}</span><span class="s">${c.last4?'•••• '+c.last4:''}</span></div>`;
-h+=`<div class="s">실적 인정 금액</div><div class="tot">${n?w(c.total):'0원'}</div>`;
-const T=(c.tiers||[]),man=v=>{const m=Math.floor(v/10000),r=v%10000,k=Math.floor(r/1000),o=r%1000;return (m?m+'만 ':'')+(k?k+'천':'')+(o?(k?' ':'')+o:'')+'원'};
-if(T.length){const max=T[T.length-1].min,pc=Math.min(c.total/max*100,100);
-h+=`<div class="bar"><i style="width:${pc}%"></i>${T.slice(0,-1).map(t=>`<u style="left:${t.min/max*100}%"></u>`).join('')}</div>`;
-const bb=(typeof BEN!=='undefined'&&BEN||[]).find(x=>x.key===c.key),cur=T.filter(t=>t.reached).pop();
-for(const t of T){const sh=bb&&(bb.tiers.find(x=>x.min_krw===t.min)||{}).short;h+=`<div class="tl${t===cur?' on':''}"><b>${t.min/10000}만${c.target===t.min&&c.target_active?'(목표)':''}</b>${sh?` <span class=sh>${sh}</span>`:''} — ${t.reached?'<span class=ok>달성</span>':'<b>'+man(t.remaining)+'</b> 남음'}</div>`;}
+const EMB={"month": "2026-10", "updated_at": "2026-10-20T11:52+09:00", "has_data": false, "recommendation": {"card": "삼성카드", "reason": "30만 원까지 300,000원 남았어요 (60만 원 넘기면 혜택 한 단계 더)"}, "cards": [{"key": "samsung", "name": "삼성카드", "last4": null, "total": 0, "target": 300000, "target_active": true, "target_start": null, "tier2": 600000, "priority": 1, "tiers": [{"min": 300000, "remaining": 300000, "reached": false}, {"min": 600000, "remaining": 600000, "reached": false}], "remaining": 300000, "transactions": []}, {"key": "hana", "name": "하나카드", "last4": null, "total": 0, "target": 200000, "target_active": true, "target_start": null, "tier2": null, "priority": 2, "tiers": [{"min": 200000, "remaining": 200000, "reached": false}], "remaining": 200000, "transactions": []}, {"key": "kb", "name": "KB국민카드", "last4": null, "total": 0, "target": 300000, "target_active": false, "target_start": "2027-01", "tier2": null, "priority": 3, "tiers": [{"min": 300000, "remaining": 300000, "reached": false}, {"min": 700000, "remaining": 700000, "reached": false}, {"min": 1000000, "remaining": 1000000, "reached": false}], "remaining": null, "transactions": []}, {"key": "shinhan", "name": "신한카드", "last4": null, "total": 0, "target": null, "target_active": false, "target_start": null, "tier2": null, "priority": null, "tiers": [{"min": 300000, "remaining": 300000, "reached": false}, {"min": 500000, "remaining": 500000, "reached": false}, {"min": 600000, "remaining": 600000, "reached": false}, {"min": 1000000, "remaining": 1000000, "reached": false}], "remaining": null, "transactions": []}, {"key": "hyundai", "name": "현대카드", "last4": null, "total": 0, "target": null, "target_active": false, "target_start": null, "tier2": null, "priority": null, "tiers": [{"min": 500000, "remaining": 500000, "reached": false}, {"min": 1000000, "remaining": 1000000, "reached": false}], "remaining": null, "transactions": []}, {"key": "ulsan", "name": "울산페이", "last4": null, "total": 0, "target": null, "target_active": false, "target_start": null, "tier2": null, "priority": null, "tiers": [{"min": 200000, "remaining": 200000, "reached": false}], "remaining": null, "transactions": []}]}, w=n=>n.toLocaleString('ko-KR')+'원';
+const man=v=>{const m=Math.floor(v/10000),r=v%10000,k=Math.floor(r/1000),o=r%1000;return ((m?m+'만 ':'')+(k?k+'천':'')+(o?(k?' ':'')+o:''))?((m?m+'만 ':'')+(k?k+'천':'')+(o?(k?' ':'')+o:'')+'원'):'0원'};
+const CATS=['식비','장보기','교육','교통·차량','주거·관리비','의료','여가','구독','기타'],COL=['#f59e0b','#10b981','#8b5cf6','#2f6fec','#64748b','#ef4444','#ec4899','#06b6d4','#a3a3a3'];
+let DATA=EMB,BEN=[],TAB=0,OPEN={},FIL='all',MON=null,MD={},MONTHS=[];
+const ben=k=>BEN.find(b=>b.key===k);
+function tab0(d){let h=`<div class="ban"><small>오늘 쓸 카드</small><b>${d.recommendation.card}</b>${d.recommendation.reason}</div>`;
+for(const c of d.cards){const n=c.transactions.filter(t=>t.ok!==false).length,T=c.tiers||[],b=ben(c.key),cur=T.filter(t=>t.reached).pop();
+h+=`<div class="card${OPEN[c.key]?' open':''}" onclick="tog('${c.key}')"><div class="h"><span>${c.name}</span><span class="s">${c.last4?'•••• '+c.last4+' ':''}<span class="chev">▾</span></span></div>`;
+h+=`<div class="s">실적 인정 금액</div><div class="tot">${w(c.total)}</div>`;
+if(T.length){const max=T[T.length-1].min;h+=`<div class="bar"><i style="width:${Math.min(c.total/max*100,100)}%"></i>${T.slice(0,-1).map(t=>`<u style="left:${t.min/max*100}%"></u>`).join('')}</div>`;
+for(const t of T){const sh=b&&(b.tiers.find(x=>x.min_krw===t.min)||{}).short;h+=`<div class="tl${t===cur?' on':''}"><b>${t.min/10000}만${c.target===t.min&&c.target_active?'(목표)':''}</b>${sh?` <span class=sh>${sh}</span>`:''} — ${t.reached?'<span class=ok>달성</span>':'<b>'+man(t.remaining)+'</b> 남음'}</div>`;}
 if(c.target&&!c.target_active)h+=`<div class="s">목표 ${w(c.target)} 관리 · ${c.target_start.replace(/(\d+)-0?(\d+)/,'$1년 $2월')}부터</div>`;}
-else h+=`<div class="s">합계만 표시</div>`;
-h+=`<div class="s">${n?`이번 달 ${n}건`:'아직 결제 알림이 없어요'}</div></div>`;}
-const u=new Date(d.updated_at);h+=`<div class="up">마지막 업데이트: ${u.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'})} (한국 시간)</div>`;
-document.getElementById('app').innerHTML=h;}
-let DATA=EMB,BEN=null;const rng=t=>w(t.min_krw).replace('0원','0원')+(t.max_krw?' ~ '+w(t.max_krw+1)+' 미만':' 이상');
-function renderBen(){if(!BEN)return;let h='<div class="bh">카드별 혜택</div><div class="s" style="margin:0 4px">파란 칸 = 이번 달 쓴 금액으로 다음 달 받을 구간</div>';
-for(const b of BEN){const c=(DATA.cards||[]).find(x=>x.key===b.key),t=c&&c.transactions.length?c.total:null;
-h+=`<details class="card"><summary>${b.card} <span class="s">${b.last4?'끝 '+b.last4:''}</span></summary>`;
-for(const r of b.tiers){const cur=t!==null&&t>=r.min_krw&&(r.max_krw===null||t<=r.max_krw);
-h+=`<div class="tier${cur?' cur':''}"><b>전월 ${rng(r)}</b>${cur?' <span class=ok>← 지금</span>':''}<ul>${r.benefits.map(x=>'<li>'+x+'</li>').join('')}</ul></div>`;}
-h+=`${b.note?`<div class="s">※ ${b.note}</div>`:''}<div class="ex">실적 제외<ul>${b.exclusions.map(x=>'<li>'+x+'</li>').join('')}</ul></div><div class="src">출처: ${b.source_url}<br>신뢰도: ${b.confidence}</div></details>`;}
-document.getElementById('ben').innerHTML=h;}
-render(EMB);fetch('data.json?'+Date.now()).then(r=>r.json()).then(d=>{DATA=d;render(d);renderBen()}).catch(()=>{});
-fetch('benefits.json?'+Date.now()).then(r=>r.json()).then(b=>{BEN=b;render(DATA);renderBen()}).catch(()=>{});
+h+=`<div class="s">${n?`이번 달 ${n}건`:'아직 결제 알림이 없어요'} · 눌러서 혜택 보기</div>`;
+h+=`<div class="det">${b?detail(b,cur):'<div class="s">혜택 정보 없음</div>'}</div></div>`;}
+return h}
+function detail(b,cur){let h=`<div class="s" style="font-weight:700;color:#333">${b.card}</div>`;
+for(const r of b.tiers){const on=cur&&cur.min===r.min_krw;h+=`<div class="tier${on?' on':''}"><b>전월 ${w(r.min_krw)}${r.max_krw?' ~ '+w(r.max_krw+1)+' 미만':' 이상'}</b>${on?' <span class=ok>← 지금</span>':''}<ul>${r.benefits.map(x=>'<li>'+x+'</li>').join('')}</ul></div>`;}
+if(b.note)h+=`<div class="s">※ ${b.note}</div>`;
+return h+`<div class="ex">실적 제외<ul>${b.exclusions.map(x=>'<li>'+x+'</li>').join('')}</ul></div><div class="src">출처: ${b.source_url} · 신뢰도: ${b.confidence}</div>`}
+function allTx(d){return d.cards.flatMap(c=>c.transactions.map(t=>({...t,card:c.key,cname:c.name,l4:t.last4||c.last4})))}
+const dt=s=>{const x=new Date(s);return `${x.getMonth()+1}/${x.getDate()} ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`};
+function tab1(d){let h=`<div class="card" style="padding:12px"><div class="chips"><button class="chip${FIL==='all'?' on':''}" onclick="fil('all')">전체</button>${d.cards.map(c=>`<button class="chip${FIL===c.key?' on':''}" onclick="fil('${c.key}')">${c.name}</button>`).join('')}</div></div>`;
+const L=allTx(d).filter(t=>FIL==='all'||t.card===FIL).sort((a,b)=>b.time<a.time?-1:1);
+const ok=L.filter(t=>t.ok!==false).reduce((s,t)=>s+t.amount,0),no=L.filter(t=>t.ok===false).reduce((s,t)=>s+t.amount,0);
+h+=`<div class="card"><div class="s">${d.month.replace('-','년 ')}월 · ${L.length}건</div><div class="tot">${w(ok+no)}</div><div class="s"><span class=ok>실적 인정 ${w(ok)}</span> · <span class=no>제외 ${w(no)}</span></div></div>`;
+h+=`<div class="card">${L.length?L.map(t=>`<div class="tx"><div><div class="l">${t.merchant||t.category}<span class="tag ${t.ok===false?'no':'ok'}">${t.ok===false?'제외':'인정'}</span></div><div class="m">${dt(t.time)} · ${t.cname}${t.l4?' '+t.l4:''}${t.merchant?' · '+t.category:''}</div></div><div class="amt" style="${t.amount<0?'color:#c2410c':''}">${w(t.amount)}</div></div>`).join(''):'<div class="empty">아직 결제 내역이 없어요</div>'}</div>`;
+return h}
+function tab2(){const d=MD[MON]||DATA,L=allTx(d).filter(t=>t.category!=='카드대금');
+const by={};CATS.forEach(c=>by[c]=0);L.forEach(t=>by[CATS.includes(t.category)?t.category:'기타']+=t.amount);
+const tot=Object.values(by).reduce((a,b)=>a+b,0),mx=Math.max(1,...Object.values(by));
+let h=`<div class="card"><div class="h"><span>지출</span><select onchange="mon(this.value)">${(MONTHS.length?MONTHS:[d.month]).map(m=>`<option value="${m}"${m===d.month?' selected':''}>${m.replace('-','년 ')}월</option>`).join('')}</select></div><div class="tot">${w(tot)}</div><div class="s">카드 결제 기준 · 카드대금 자동이체는 빼고 계산</div></div>`;
+h+=`<div class="card"><div class="h"><span>분류별</span></div>${CATS.map((c,i)=>`<div class="row"><span class="n">${c}</span><span class="b"><i style="width:${Math.max(by[c],0)/mx*100}%;background:${COL[i]}"></i></span><span class="v">${man(Math.max(by[c],0)).replace(/ /g,'')}</span></div>`).join('')}</div>`;
+const [y,m]=d.month.split('-').map(Number),nd=new Date(y,m,0).getDate(),day=Array(nd).fill(0);L.forEach(t=>{day[new Date(t.time).getDate()-1]+=t.amount});
+const dm=Math.max(1,...day);h+=`<div class="card"><div class="h"><span>일별</span></div><div class="cols">${day.map(v=>`<i style="height:${Math.max(v,0)/dm*100}%"></i>`).join('')}</div><div class="axis"><span>1일</span><span>15일</span><span>${nd}일</span></div>`;
+const wk=[];day.forEach((v,i)=>{const k=Math.floor((i+new Date(y,m-1,1).getDay())/7);wk[k]=(wk[k]||0)+v});const wm=Math.max(1,...wk);
+h+=`<div class="h" style="margin-top:14px"><span>주별</span></div>${wk.map((v,i)=>`<div class="row"><span class="n">${i+1}주차</span><span class="b"><i style="width:${Math.max(v,0)/wm*100}%;background:#1f3b73"></i></span><span class="v">${man(Math.max(v,0)).replace(/ /g,'')}</span></div>`).join('')}</div>`;
+return h}
+function draw(){const d=DATA;let h=[tab0,tab1,tab2][TAB](d);const u=new Date(d.updated_at);
+h+=`<div class="up">마지막 업데이트: ${u.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'})} (한국 시간)</div>`;
+document.getElementById('app').innerHTML=h;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',+b.dataset.t===TAB))}
+function tog(k){OPEN[k]=!OPEN[k];draw()}function fil(k){FIL=k;draw()}
+function mon(m){MON=m;if(MD[m])return draw();fetch('data-'+m+'.json?'+Date.now()).then(r=>r.json()).then(x=>{MD[m]=x;draw()}).catch(()=>{})}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{TAB=+b.dataset.t;draw();scrollTo(0,0)});
+const q=new URLSearchParams(location.search);if(q.get('tab'))TAB=+q.get('tab');if(q.get('open'))q.get('open').split(',').forEach(k=>OPEN[k]=1);
+MON=EMB.month;MD[MON]=EMB;draw();
+fetch('data.json?'+Date.now()).then(r=>r.json()).then(d=>{DATA=d;MD[d.month]=d;if(!MON||MON===EMB.month)MON=d.month;draw()}).catch(()=>{});
+fetch('benefits.json?'+Date.now()).then(r=>r.json()).then(b=>{BEN=b;draw()}).catch(()=>{});
+fetch('months.json?'+Date.now()).then(r=>r.json()).then(m=>{MONTHS=m;draw()}).catch(()=>{});
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 </script></body></html>
