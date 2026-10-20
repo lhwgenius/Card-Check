@@ -8,7 +8,9 @@
 .h{display:flex;justify-content:space-between;font-size:20px;font-weight:700}.tot{font-size:26px;font-weight:800;margin:6px 0}
 .bar{height:16px;background:#e6e9f0;border-radius:9px;overflow:hidden;position:relative}.bar i{display:block;height:100%;background:#2f6fec}
 .bar u{position:absolute;top:0;bottom:0;width:2px;background:#e33}.s{color:#666;font-size:15px;margin-top:6px}.ok{color:#14894a;font-weight:700}
-.up{color:#888;text-align:center;font-size:13px;margin:16px}.empty{color:#999;font-size:15px}</style></head><body><div class="wrap" id="app"></div>
+.up{color:#888;text-align:center;font-size:13px;margin:16px}.empty{color:#999;font-size:15px}.bh{font-size:20px;font-weight:800;margin:22px 4px 4px}details.card summary{font-size:18px;font-weight:700;cursor:pointer;list-style:none}
+details.card summary::after{content:' ▾';color:#888}details[open].card summary::after{content:' ▴'}.tier{border:1px solid #e3e6ee;border-radius:12px;padding:10px;margin-top:8px}
+.tier.cur{border:2px solid #2f6fec;background:#eef4ff}.tier b{font-size:15px}.tier ul,.ex ul{margin:6px 0 0 18px;padding:0;font-size:14px;color:#333}.ex{font-size:13px;color:#666;margin-top:10px}.src{font-size:12px;color:#999;margin-top:6px;word-break:break-all}</style></head><body><div class="wrap"><div id="app"></div><div id="ben"></div></div>
 <script>
 const EMB={"month": "2026-10", "updated_at": "2026-10-20T10:49+09:00", "has_data": false, "recommendation": {"card": "삼성카드", "reason": "30만 원까지 300,000원 남았어요 (60만 원 넘기면 혜택 한 단계 더)"}, "cards": [{"key": "samsung", "name": "삼성카드", "last4": null, "total": 0, "target": 300000, "target_active": true, "target_start": null, "tier2": 600000, "priority": 1, "remaining": 300000, "transactions": []}, {"key": "hana", "name": "하나카드", "last4": null, "total": 0, "target": 200000, "target_active": true, "target_start": null, "tier2": null, "priority": 2, "remaining": 200000, "transactions": []}, {"key": "kb", "name": "KB국민카드", "last4": null, "total": 0, "target": 300000, "target_active": false, "target_start": "2027-01", "tier2": null, "priority": 3, "remaining": null, "transactions": []}, {"key": "shinhan", "name": "신한카드", "last4": null, "total": 0, "target": null, "target_active": false, "target_start": null, "tier2": null, "priority": null, "remaining": null, "transactions": []}, {"key": "hyundai", "name": "현대카드", "last4": null, "total": 0, "target": null, "target_active": false, "target_start": null, "tier2": null, "priority": null, "remaining": null, "transactions": []}, {"key": "ulsan", "name": "울산페이", "last4": null, "total": 0, "target": null, "target_active": false, "target_start": null, "tier2": null, "priority": null, "remaining": null, "transactions": []}]}, w=n=>n.toLocaleString('ko-KR')+'원';
 function render(d){let h=`<div class="ban"><small>오늘 쓸 카드</small><b>${d.recommendation.card}</b>${d.recommendation.reason}</div>`;
@@ -24,6 +26,15 @@ else h+=`<div class="s">목표 없음 · 합계만 표시</div>`;
 h+=`<div class="s">${n?`이번 달 ${n}건`:'아직 결제 알림이 없어요'}</div></div>`;}
 const u=new Date(d.updated_at);h+=`<div class="up">마지막 업데이트: ${u.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'})} (한국 시간)</div>`;
 document.getElementById('app').innerHTML=h;}
-render(EMB);fetch('data.json?'+Date.now()).then(r=>r.json()).then(render).catch(()=>{});
+let DATA=EMB,BEN=null;const rng=t=>w(t.min_krw).replace('0원','0원')+(t.max_krw?' ~ '+w(t.max_krw+1)+' 미만':' 이상');
+function renderBen(){if(!BEN)return;let h='<div class="bh">카드별 혜택</div><div class="s" style="margin:0 4px">파란 칸 = 이번 달 쓴 금액으로 다음 달 받을 구간</div>';
+for(const b of BEN){const c=(DATA.cards||[]).find(x=>x.key===b.key),t=c&&c.transactions.length?c.total:null;
+h+=`<details class="card"><summary>${b.card} <span class="s">${b.last4?'끝 '+b.last4:''}</span></summary>`;
+for(const r of b.tiers){const cur=t!==null&&t>=r.min_krw&&(r.max_krw===null||t<=r.max_krw);
+h+=`<div class="tier${cur?' cur':''}"><b>전월 ${r.min_krw?rng(r):(r.max_krw?w(r.max_krw+1)+' 미만':'')}</b>${cur?' <span class=ok>← 지금</span>':''}<ul>${r.benefits.map(x=>'<li>'+x+'</li>').join('')}</ul></div>`;}
+h+=`<div class="ex">실적 제외<ul>${b.exclusions.map(x=>'<li>'+x+'</li>').join('')}</ul></div><div class="src">출처: ${b.source_url}<br>신뢰도: ${b.confidence}</div></details>`;}
+document.getElementById('ben').innerHTML=h;}
+render(EMB);fetch('data.json?'+Date.now()).then(r=>r.json()).then(d=>{DATA=d;render(d);renderBen()}).catch(()=>{});
+fetch('benefits.json?'+Date.now()).then(r=>r.json()).then(b=>{BEN=b;renderBen()}).catch(()=>{});
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 </script></body></html>
