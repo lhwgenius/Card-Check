@@ -47,12 +47,12 @@ if(b.note)h+=`<div class="s">※ ${b.note}</div>`;
 return h+`<div class="ex">실적 제외<ul>${b.exclusions.map(x=>'<li>'+x+'</li>').join('')}</ul></div><div class="src">출처: ${b.source_url} · 신뢰도: ${b.confidence}</div>`}
 function allTx(d){return d.cards.flatMap(c=>c.transactions.map(t=>({...t,card:c.key,cname:c.name,l4:t.last4||c.last4})))}
 const dt=s=>{const x=new Date(s);return `${x.getMonth()+1}/${x.getDate()} ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`};
-function tab1(d){const A=d.cards.map(c=>c.transactions),all=A.flat(),sum=f=>all.filter(f).reduce((s,t)=>s+t.amount,0),ok=sum(t=>t.ok!==false),no=sum(t=>t.ok===false);
-let h=`<div class="card"><div class="s">${d.month.replace('-','년 ')}월 전체 사용 · ${all.length}건</div><div class="tot">${w(ok+no)}</div><div class="s"><span class=ok>실적 인정 ${w(ok)}</span> · <span class=no>제외 ${w(no)}</span></div></div>`;
-for(const c of d.cards){const L=[...c.transactions].sort((a,b)=>b.time<a.time?-1:1),co=L.filter(t=>t.ok!==false).reduce((s,t)=>s+t.amount,0),cn=L.filter(t=>t.ok===false).reduce((s,t)=>s+t.amount,0),k='u_'+c.key;
+function tab1(d){const all=d.cards.flatMap(c=>c.transactions),tot=all.reduce((s,t)=>s+t.amount,0);
+let h=`<div class="card"><div class="s">${d.month.replace('-','년 ')}월 전체 사용 · ${all.length}건</div><div class="tot">${w(tot)}</div></div>`;
+for(const c of d.cards){const L=[...c.transactions].sort((a,b)=>b.time<a.time?-1:1),ct=L.reduce((s,t)=>s+t.amount,0),k='u_'+c.key;
 h+=`<div class="card${OPEN[k]?' open':''}" onclick="tog('${k}')"><div class="h"><span>${c.name}</span><span class="s">${c.last4?'•••• '+c.last4+' ':''}<span class="chev">▾</span></span></div>`;
-h+=`<div class="s">이번 달 사용 · ${L.length}건</div><div class="tot">${w(co+cn)}</div><div class="s"><span class=ok>실적 인정 ${w(co)}</span> · <span class=no>제외 ${w(cn)}</span></div>`;
-h+=`<div class="s">${L.length?'눌러서 승인 내역 보기':'아직 결제 알림이 없어요'}</div><div class="det">${L.length?L.map(t=>`<div class="tx"><div><div class="l">${t.merchant||t.category}<span class="tag ${t.ok===false?'no':'ok'}">${t.ok===false?'제외':'인정'}</span></div><div class="m">${dt(t.time)}${t.last4&&t.last4!==c.last4?' · '+t.last4:''}${t.merchant?' · '+t.category:''}</div></div><div class="amt" style="${t.amount<0?'color:#c2410c':''}">${w(t.amount)}</div></div>`).join(''):'<div class="empty">승인 내역이 없어요</div>'}</div></div>`;}
+h+=`<div class="s">이번 달 사용 · ${L.length}건</div><div class="tot">${w(ct)}</div>`;
+h+=`<div class="s">${L.length?'눌러서 사용내역 보기':'아직 사용내역이 없어요'}</div><div class="det">${L.length?L.map(t=>`<div class="tx"><div><div class="l">${t.merchant||t.category}</div><div class="m">${dt(t.time)}${t.last4&&t.last4!==c.last4?' · '+t.last4:''}</div></div><div class="amt" style="${t.amount<0?'color:#c2410c':''}">${w(t.amount)}</div></div>`).join(''):'<div class="empty">아직 사용내역이 없어요</div>'}</div></div>`;}
 return h}
 function tab2(){const d=MD[MON]||DATA,L=allTx(d).filter(t=>t.category!=='카드대금');
 const by={};CATS.forEach(c=>by[c]=0);L.forEach(t=>by[CATS.includes(t.category)?t.category:'기타']+=t.amount);
