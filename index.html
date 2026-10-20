@@ -31,7 +31,11 @@ const man=v=>{const m=Math.floor(v/10000),r=v%10000,k=Math.floor(r/1000),o=r%100
 const CATS=['식비','장보기','교육','교통·차량','주거·관리비','의료','여가','구독','기타'],COL=['#f59e0b','#10b981','#8b5cf6','#2f6fec','#64748b','#ef4444','#ec4899','#06b6d4','#a3a3a3'];
 let DATA=EMB,BEN=[],TAB=0,OPEN={},FIL='all',MON=null,MD={},MONTHS=[];
 const ben=k=>BEN.find(b=>b.key===k);
-function tab0(d){let h=`<div class="ban"><small>오늘 쓸 카드</small><b>${d.recommendation.card}</b>${d.recommendation.reason}</div>`;
+const ML=()=>[...new Set([...(MONTHS||[]),DATA.month,MON])].filter(Boolean).sort().reverse();
+const sel=()=>`<select onchange="mon(this.value)">${ML().map(m=>`<option value="${m}"${m===MON?' selected':''}>${m.replace('-','년 ')}월</option>`).join('')}</select>`;
+const msel=()=>`<div class="card" style="padding:12px 16px"><div class="h"><span style="font-size:16px">조회 월</span>${sel()}</div></div>`;
+const cur=()=>MON===DATA.month;
+function tab0(d){let h=msel();if(!d)return h+'<div class="card"><div class="empty">이 달의 기록이 없어요</div></div>';if(cur()&&d.recommendation)h+=`<div class="ban" style="margin-top:12px"><small>오늘 쓸 카드</small><b>${d.recommendation.card}</b>${d.recommendation.reason}</div>`;
 for(const c of d.cards){const n=c.transactions.filter(t=>t.ok!==false).length,T=c.tiers||[],b=ben(c.key),cur=T.filter(t=>t.reached).pop();
 h+=`<div class="card${OPEN[c.key]?' open':''}" onclick="tog('${c.key}')"><div class="h"><span>${c.name}</span><span class="s">${c.last4?'•••• '+c.last4+' ':''}<span class="chev">▾</span></span></div>`;
 h+=`<div class="s">실적 인정 금액</div><div class="tot">${w(c.total)}</div>`;
@@ -47,32 +51,32 @@ if(b.note)h+=`<div class="s">※ ${b.note}</div>`;
 return h+`<div class="ex">실적 제외<ul>${b.exclusions.map(x=>'<li>'+x+'</li>').join('')}</ul></div><div class="src">출처: ${b.source_url} · 신뢰도: ${b.confidence}</div>`}
 function allTx(d){return d.cards.flatMap(c=>c.transactions.map(t=>({...t,card:c.key,cname:c.name,l4:t.last4||c.last4})))}
 const dt=s=>{const x=new Date(s);return `${x.getMonth()+1}/${x.getDate()} ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`};
-function tab1(d){const all=d.cards.flatMap(c=>c.transactions),tot=all.reduce((s,t)=>s+t.amount,0);
-let h=`<div class="card"><div class="s">${d.month.replace('-','년 ')}월 전체 사용 · ${all.length}건</div><div class="tot">${w(tot)}</div></div>`;
+function tab1(d){if(!d)return msel()+'<div class="card"><div class="empty">이 달의 기록이 없어요</div></div>';const all=d.cards.flatMap(c=>c.transactions),tot=all.reduce((s,t)=>s+t.amount,0);
+let h=msel()+`<div class="card"><div class="s">${d.month.replace('-','년 ')}월 전체 사용 · ${all.length}건</div><div class="tot">${w(tot)}</div></div>`;
 for(const c of d.cards){const L=[...c.transactions].sort((a,b)=>b.time<a.time?-1:1),ct=L.reduce((s,t)=>s+t.amount,0),k='u_'+c.key;
 h+=`<div class="card${OPEN[k]?' open':''}" onclick="tog('${k}')"><div class="h"><span>${c.name}</span><span class="s">${c.last4?'•••• '+c.last4+' ':''}<span class="chev">▾</span></span></div>`;
-h+=`<div class="s">이번 달 사용 · ${L.length}건</div><div class="tot">${w(ct)}</div>`;
-h+=`<div class="s">${L.length?'눌러서 사용내역 보기':'아직 사용내역이 없어요'}</div><div class="det">${L.length?L.map(t=>`<div class="tx"><div><div class="l">${t.merchant||t.category}</div><div class="m">${dt(t.time)}${t.last4&&t.last4!==c.last4?' · '+t.last4:''}</div></div><div class="amt" style="${t.amount<0?'color:#c2410c':''}">${w(t.amount)}</div></div>`).join(''):'<div class="empty">아직 사용내역이 없어요</div>'}</div></div>`;}
+h+=`<div class="s">${cur()?'이번 달':d.month.replace(/.*-0?/,'')+'월'} 사용 · ${L.length}건</div><div class="tot">${w(ct)}</div>`;
+h+=`<div class="s">${L.length?'눌러서 사용내역 보기':'아직 사용내역이 없어요'}</div>${L.length?`<div class="det">`+L.map(t=>`<div class="tx"><div><div class="l">${t.merchant||t.category}</div><div class="m">${dt(t.time)}${t.last4&&t.last4!==c.last4?' · '+t.last4:''}</div></div><div class="amt" style="${t.amount<0?'color:#c2410c':''}">${w(t.amount)}</div></div>`).join('')+'</div>':''}</div>`;}
 return h}
-function tab2(){const d=MD[MON]||DATA,L=allTx(d).filter(t=>t.category!=='카드대금');
+function tab2(d){if(!d)return msel()+'<div class="card"><div class="empty">이 달의 기록이 없어요</div></div>';const L=allTx(d).filter(t=>t.category!=='카드대금');
 const by={};CATS.forEach(c=>by[c]=0);L.forEach(t=>by[CATS.includes(t.category)?t.category:'기타']+=t.amount);
 const tot=Object.values(by).reduce((a,b)=>a+b,0),mx=Math.max(1,...Object.values(by));
-let h=`<div class="card"><div class="h"><span>지출</span><select onchange="mon(this.value)">${(MONTHS.length?MONTHS:[d.month]).map(m=>`<option value="${m}"${m===d.month?' selected':''}>${m.replace('-','년 ')}월</option>`).join('')}</select></div><div class="tot">${w(tot)}</div><div class="s">카드 결제 기준 · 카드대금 자동이체는 빼고 계산</div></div>`;
+let h=`<div class="card"><div class="h"><span>지출</span>${sel()}</div><div class="tot">${w(tot)}</div><div class="s">카드 결제 기준 · 카드대금 자동이체는 빼고 계산</div></div>`;
 h+=`<div class="card"><div class="h"><span>분류별</span></div>${CATS.map((c,i)=>`<div class="row"><span class="n">${c}</span><span class="b"><i style="width:${Math.max(by[c],0)/mx*100}%;background:${COL[i]}"></i></span><span class="v">${man(Math.max(by[c],0)).replace(/ /g,'')}</span></div>`).join('')}</div>`;
 const [y,m]=d.month.split('-').map(Number),nd=new Date(y,m,0).getDate(),day=Array(nd).fill(0);L.forEach(t=>{day[new Date(t.time).getDate()-1]+=t.amount});
 const dm=Math.max(1,...day);h+=`<div class="card"><div class="h"><span>일별</span></div><div class="cols">${day.map(v=>`<i style="height:${Math.max(v,0)/dm*100}%"></i>`).join('')}</div><div class="axis"><span>1일</span><span>15일</span><span>${nd}일</span></div>`;
 const wk=[];day.forEach((v,i)=>{const k=Math.floor((i+new Date(y,m-1,1).getDay())/7);wk[k]=(wk[k]||0)+v});const wm=Math.max(1,...wk);
 h+=`<div class="h" style="margin-top:14px"><span>주별</span></div>${wk.map((v,i)=>`<div class="row"><span class="n">${i+1}주차</span><span class="b"><i style="width:${Math.max(v,0)/wm*100}%;background:#1f3b73"></i></span><span class="v">${man(Math.max(v,0)).replace(/ /g,'')}</span></div>`).join('')}</div>`;
 return h}
-function draw(){const d=DATA;let h=[tab0,tab1,tab2][TAB](d);const u=new Date(d.updated_at);
+function draw(){const d=MD[MON]===0?null:(MD[MON]||(MON===DATA.month?DATA:null));if(MD[MON]===undefined&&MON!==DATA.month)return mon(MON);if(MD[MON]==='L'){document.getElementById('app').innerHTML=msel()+'<div class="card"><div class="empty">불러오는 중…</div></div>';return}let h=[tab0,tab1,tab2][TAB](d);const u=new Date((d||DATA).updated_at);
 h+=`<div class="up">마지막 업데이트: ${u.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'})} (한국 시간)</div>`;
 document.getElementById('app').innerHTML=h;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',+b.dataset.t===TAB))}
 function tog(k){OPEN[k]=!OPEN[k];draw()}function fil(k){FIL=k;draw()}
-function mon(m){MON=m;if(MD[m])return draw();fetch('data-'+m+'.json?'+Date.now()).then(r=>r.json()).then(x=>{MD[m]=x;draw()}).catch(()=>{})}
+function mon(m){MON=m;if(MD[m]==='L')return;if(MD[m])return draw();if(MD[m]===0)return draw();MD[m]='L';fetch('data-'+m+'.json?'+Date.now()).then(r=>{if(!r.ok)throw 0;return r.json()}).then(x=>{MD[m]=x;draw()}).catch(()=>{MD[m]=0;draw()})}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{TAB=+b.dataset.t;draw();scrollTo(0,0)});
 const q=new URLSearchParams(location.search);if(q.get('tab'))TAB=+q.get('tab');if(q.get('open'))q.get('open').split(',').forEach(k=>OPEN[k]=1);
-MON=EMB.month;MD[MON]=EMB;draw();
-fetch('data.json?'+Date.now()).then(r=>r.json()).then(d=>{DATA=d;MD[d.month]=d;if(!MON||MON===EMB.month)MON=d.month;draw()}).catch(()=>{});
+MON=EMB.month;MD[MON]=EMB;if(q.get('m'))MON=q.get('m');draw();
+fetch('data.json?'+Date.now()).then(r=>r.json()).then(d=>{DATA=d;MD[d.month]=d;if(!q.get('m')&&(!MON||MON===EMB.month))MON=d.month;draw()}).catch(()=>{});
 fetch('benefits.json?'+Date.now()).then(r=>r.json()).then(b=>{BEN=b;draw()}).catch(()=>{});
 fetch('months.json?'+Date.now()).then(r=>r.json()).then(m=>{MONTHS=m;draw()}).catch(()=>{});
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
