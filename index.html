@@ -1,0 +1,29 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1f3b73"><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><title>카드 실적</title>
+<style>body{margin:0;font-family:system-ui,'Noto Sans KR',sans-serif;background:#f2f4f8;color:#222}
+.wrap{max-width:520px;margin:auto;padding:14px}.ban{background:#1f3b73;color:#fff;border-radius:18px;padding:18px}
+.ban small{opacity:.8}.ban b{display:block;font-size:30px;margin:6px 0}.card{background:#fff;border-radius:18px;padding:16px;margin-top:12px;box-shadow:0 1px 4px #0001}
+.h{display:flex;justify-content:space-between;font-size:20px;font-weight:700}.tot{font-size:26px;font-weight:800;margin:6px 0}
+.bar{height:16px;background:#e6e9f0;border-radius:9px;overflow:hidden;position:relative}.bar i{display:block;height:100%;background:#2f6fec}
+.bar u{position:absolute;top:0;bottom:0;width:2px;background:#e33}.s{color:#666;font-size:15px;margin-top:6px}.ok{color:#14894a;font-weight:700}
+.up{color:#888;text-align:center;font-size:13px;margin:16px}.empty{color:#999;font-size:15px}</style></head><body><div class="wrap" id="app"></div>
+<script>
+const EMB={"month": "2026-10", "updated_at": "2026-10-20T10:49+09:00", "has_data": false, "recommendation": {"card": "삼성카드", "reason": "30만 원까지 300,000원 남았어요 (60만 원 넘기면 혜택 한 단계 더)"}, "cards": [{"key": "samsung", "name": "삼성카드", "last4": null, "total": 0, "target": 300000, "target_active": true, "target_start": null, "tier2": 600000, "priority": 1, "remaining": 300000, "transactions": []}, {"key": "hana", "name": "하나카드", "last4": null, "total": 0, "target": 200000, "target_active": true, "target_start": null, "tier2": null, "priority": 2, "remaining": 200000, "transactions": []}, {"key": "kb", "name": "KB국민카드", "last4": null, "total": 0, "target": 300000, "target_active": false, "target_start": "2027-01", "tier2": null, "priority": 3, "remaining": null, "transactions": []}, {"key": "shinhan", "name": "신한카드", "last4": null, "total": 0, "target": null, "target_active": false, "target_start": null, "tier2": null, "priority": null, "remaining": null, "transactions": []}, {"key": "hyundai", "name": "현대카드", "last4": null, "total": 0, "target": null, "target_active": false, "target_start": null, "tier2": null, "priority": null, "remaining": null, "transactions": []}, {"key": "ulsan", "name": "울산페이", "last4": null, "total": 0, "target": null, "target_active": false, "target_start": null, "tier2": null, "priority": null, "remaining": null, "transactions": []}]}, w=n=>n.toLocaleString('ko-KR')+'원';
+function render(d){let h=`<div class="ban"><small>오늘 쓸 카드</small><b>${d.recommendation.card}</b>${d.recommendation.reason}</div>`;
+if(!d.has_data)h+=`<div class="card empty">아직 결제 알림이 없어요</div>`;
+for(const c of d.cards){const n=c.transactions.length;h+=`<div class="card"><div class="h"><span>${c.name}</span><span class="s">${c.last4?'•••• '+c.last4:''}</span></div>`;
+h+=`<div class="tot">${n?w(c.total):'0원'}</div>`;
+if(c.target&&c.target_active){const max=c.tier2||c.target,pc=Math.min(c.total/max*100,100);
+h+=`<div class="bar"><i style="width:${pc}%"></i>${c.tier2?`<u style="left:${c.target/max*100}%"></u>`:''}</div>`;
+h+=c.remaining>0?`<div class="s">목표 ${w(c.target)}까지 <b>${w(c.remaining)}</b> 남음</div>`:`<div class="s ok">목표 ${w(c.target)} 달성!</div>`;
+if(c.tier2)h+=`<div class="s">60만 원 단계: ${c.total>=c.tier2?'<span class=ok>달성!</span>':w(c.tier2-c.total)+' 남음'}</div>`;}
+else if(c.target)h+=`<div class="s">목표 ${w(c.target)} · ${c.target_start.replace(/(\d+)-0?(\d+)/,'$1년 $2월')}부터</div>`;
+else h+=`<div class="s">목표 없음 · 합계만 표시</div>`;
+h+=`<div class="s">${n?`이번 달 ${n}건`:'아직 결제 알림이 없어요'}</div></div>`;}
+const u=new Date(d.updated_at);h+=`<div class="up">마지막 업데이트: ${u.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'})} (한국 시간)</div>`;
+document.getElementById('app').innerHTML=h;}
+render(EMB);fetch('data.json?'+Date.now()).then(r=>r.json()).then(render).catch(()=>{});
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
+</script></body></html>
