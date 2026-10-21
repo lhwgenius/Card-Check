@@ -45,7 +45,7 @@ if(c.target&&!c.target_active)h+=`<div class="s">목표 ${w(c.target)} 관리 ·
 h+=`<div class="s">${n?`이번 달 ${n}건`:'아직 결제 알림이 없어요'} · 눌러서 혜택 보기</div>`;
 h+=`<div class="det">${b?detail(b,cur):'<div class="s">혜택 정보 없음</div>'}</div></div>`;}
 return h}
-function detail(b,cur){let h=`<div class="s" style="font-weight:700;color:#333">${b.card}</div>`;
+function detail(b,cur){let h=`<div class="s" style="font-weight:700;color:#333">${b.card}</div>${b.annual_fee?`<div class="s" style="margin-top:2px">연회비: ${b.annual_fee}</div>`:''}`;
 for(const r of b.tiers){const on=cur&&cur.min===r.min_krw;h+=`<div class="tier${on?' on':''}"><b>전월 ${w(r.min_krw)}${r.max_krw?' ~ '+w(r.max_krw+1)+' 미만':' 이상'}</b>${on?' <span class=ok>← 지금</span>':''}<ul>${r.benefits.map(x=>'<li>'+x+'</li>').join('')}</ul></div>`;}
 if(b.note)h+=`<div class="s">※ ${b.note}</div>`;
 return h+`<div class="ex">실적 제외<ul>${b.exclusions.map(x=>'<li>'+x+'</li>').join('')}</ul></div><div class="src">출처: ${b.source_url} · 신뢰도: ${b.confidence}</div>`}
