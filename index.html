@@ -35,6 +35,18 @@ const ML=()=>[...new Set([...(MONTHS||[]),DATA.month,MON])].filter(Boolean).sort
 const sel=()=>`<select onchange="mon(this.value)">${ML().map(m=>`<option value="${m}"${m===MON?' selected':''}>${m.replace('-','년 ')}월</option>`).join('')}</select>`;
 const msel=()=>`<div class="card" style="padding:12px 16px"><div class="h"><span style="font-size:16px">조회 월</span>${sel()}</div></div>`;
 const cur=()=>MON===DATA.month;
+const prevM=m=>{const [y,mo]=m.split('-').map(Number),d=new Date(y,mo-2,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
+const isEvChg=t=>/파워큐브|전기차|슈퍼차저|슈퍼차져|테슬라슈퍼|차지비|에버온|플러그링크|클린일렉스|한국전기차/.test((t.merchant||'')+' '+(t.memo||''));
+function evUse(txs){const left=[];for(const t of (txs||[]).filter(isEvChg)){const i=left.findIndex(x=>(x.merchant||'')===(t.merchant||'')&&x.amount===-t.amount);if(i>=0)left.splice(i,1);else left.push(t)}const pos=left.filter(t=>t.amount>0);return {n:pos.length,sum:pos.reduce((a,t)=>a+t.amount,0)}}
+function evOffer(b,total){if(!b)return null;const tier=[...b.tiers].reverse().find(r=>total>=r.min_krw&&(r.max_krw==null||total<=r.max_krw));if(!tier)return null;const line=tier.benefits.find(x=>x.includes('전기차 충전'));if(!line)return null;const m=line.match(/(\d+)\s*%[^0-9]*(\d+)\s*만/);if(!m)return null;return {rate:+m[1],cap:+m[2]*10000}}
+function evBox(d){if(!BEN.length||!d)return '';const pm=prevM(d.month),prev=MD[pm];
+if(prev===undefined||prev==='L'){if(prev!=='L'){MD[pm]='L';fetch('data-'+pm+'.json?'+Date.now()).then(r=>{if(!r.ok)throw 0;return r.json()}).then(x=>{MD[pm]=x;draw()}).catch(()=>{MD[pm]=0;draw()})}return `<div class="card"><div class="h"><span>⚡ 전기차 충전 할인</span></div><div class="s">전월 실적을 불러오는 중…</div></div>`}
+if(!prev||!prev.cards)return '';
+const rows=[];
+for(const key of ['samsung','shinhan']){const c=d.cards.find(x=>x.key===key);if(!c)continue;const pt=(prev.cards.find(x=>x.key===key)||{}).total||0,off=evOffer(ben(key),pt);if(!off)continue;const use=evUse(c.transactions),disc=Math.min(off.cap,Math.floor(use.sum*off.rate/100)),left=off.cap-disc;
+rows.push(`<div class="h" style="font-size:17px;margin-top:14px"><span>${c.name}</span><span style="font-size:15px">${off.rate}% · 한도 ${w(off.cap)}</span></div><div class="bar"><i style="width:${Math.min(disc/off.cap*100,100)}%"></i></div><div class="s">남은 한도 <b style="color:#222">${w(left)}</b> · 할인 ${w(disc)} 사용 (충전 ${use.n}건 ${w(use.sum)})</div><div class="s">${+pm.slice(5)}월 실적 ${w(pt)} 기준</div>`)}
+if(!rows.length)return '';
+return `<div class="card"><div class="h"><span>⚡ 전기차 충전 할인</span></div>${rows.join('')}<div class="s">결제일 할인이라 예상액이에요 · 파워큐브는 후불정산 결제시 할인</div></div>`}
 function tab0(d){let h=msel();if(!d)return h+'<div class="card"><div class="empty">이 달의 기록이 없어요</div></div>';if(cur()&&d.recommendation)h+=`<div class="ban" style="margin-top:12px"><small>오늘 쓸 카드</small><b>${d.recommendation.card}</b>${d.recommendation.reason}</div>`;
 for(const c of d.cards.filter(c=>!isB(c))){const n=c.transactions.filter(t=>t.ok!==false).length,T=c.tiers||[],b=ben(c.key),cur=T.filter(t=>t.reached).pop();
 h+=`<div class="card${OPEN[c.key]?' open':''}" onclick="tog('${c.key}')"><div class="h"><span>${c.name}</span><span class="s">${c.last4?'•••• '+c.last4+' ':''}<span class="chev">▾</span></span></div>`;
@@ -44,7 +56,7 @@ for(const t of T){const sh=b&&(b.tiers.find(x=>x.min_krw===t.min)||{}).short;h+=
 if(c.target&&!c.target_active)h+=`<div class="s">목표 ${w(c.target)} 관리 · ${c.target_start.replace(/(\d+)-0?(\d+)/,'$1년 $2월')}부터</div>`;}
 h+=`<div class="s">${n?`이번 달 ${n}건`:'아직 결제 알림이 없어요'} · 눌러서 혜택 보기</div>`;
 h+=`<div class="det">${b?detail(b,cur):'<div class="s">혜택 정보 없음</div>'}</div></div>`;}
-return h}
+h+=evBox(d);return h}
 function detail(b,cur){let h=`<div class="s" style="font-weight:700;color:#333">${b.card}</div>${b.annual_fee?`<div class="s" style="margin-top:2px">연회비: ${b.annual_fee}</div>`:''}`;
 for(const r of b.tiers){const on=cur&&cur.min===r.min_krw;h+=`<div class="tier${on?' on':''}"><b>전월 ${w(r.min_krw)}${r.max_krw?' ~ '+w(r.max_krw+1)+' 미만':' 이상'}</b>${on?' <span class=ok>← 지금</span>':''}<ul>${r.benefits.map(x=>'<li>'+x+'</li>').join('')}</ul></div>`;}
 if(b.note)h+=`<div class="s">※ ${b.note}</div>`;
@@ -84,5 +96,5 @@ MON=EMB.month;MD[MON]=EMB;if(q.get('m'))MON=q.get('m');if(q.get('cat'))CATV=q.ge
 fetch('data.json?'+Date.now()).then(r=>r.json()).then(d=>{DATA=d;MD[d.month]=d;if(!q.get('m')&&(!MON||MON===EMB.month))MON=d.month;draw()}).catch(()=>{});
 fetch('benefits.json?'+Date.now()).then(r=>r.json()).then(b=>{BEN=b;draw()}).catch(()=>{});
 fetch('months.json?'+Date.now()).then(r=>r.json()).then(m=>{MONTHS=m;draw()}).catch(()=>{});
-if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js?v=13');
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js?v=14');
 </script></body></html>
